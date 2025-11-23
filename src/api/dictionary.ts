@@ -1,4 +1,3 @@
-// src/api/dictionary.ts
 import type { DictionaryWord } from "../types/dictionary";
 
 export async function fetchWord(word: string): Promise<DictionaryWord> {

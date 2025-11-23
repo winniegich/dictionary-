@@ -14,17 +14,17 @@ export default function SearchBar() {
   };
 
   return (
-    <div className="flex flex-col sm:flex-row gap-2 w-full max-w-md mx-auto mt-10">
+    <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md mx-auto mt-10 p-4 bg-white rounded-xl shadow-lg">
       <input
         type="text"
-        className="border rounded px-3 py-2 w-full sm:w-auto"
-        placeholder="Enter a word"
+        className="border border-gray-300 rounded-lg px-4 py-2 w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-300"
+        placeholder="Enter a word..."
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
       />
       <button
-        className="bg-blue-500 text-white px-4 py-2 rounded"
+        className="bg-blue-500 text-white px-5 py-2 rounded-lg hover:bg-blue-600"
         onClick={handleSearch}
       >
         Search

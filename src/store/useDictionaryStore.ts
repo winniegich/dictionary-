@@ -1,4 +1,3 @@
-// src/store/useDictionaryStore.ts
 import { create } from "zustand";
 
 interface DictionaryState {
