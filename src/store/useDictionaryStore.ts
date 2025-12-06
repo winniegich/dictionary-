@@ -2,10 +2,19 @@ import { create } from "zustand";
 
 interface DictionaryState {
   word: string;
-  setWord: (w: string) => void;
+  recentSearches: string[];
+  setWord: (word: string) => void;
 }
 
 export const useDictionaryStore = create<DictionaryState>((set) => ({
   word: "",
-  setWord: (w) => set({ word: w }),
+  recentSearches: [],
+
+  setWord: (word: string) =>
+    set((state) => ({
+      word,
+      recentSearches: state.recentSearches.includes(word)
+        ? state.recentSearches // avoid duplicates
+        : [word, ...state.recentSearches].slice(0, 5), // keep only latest 5 searches
+    })),
 }));

@@ -1,25 +1,28 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import SearchBar from "./components/SearchBar";
 import WordCard from "./components/WordCard";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const queryClient = new QueryClient();
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-4">
-  
-        <header className="text-center mt-6 mb-10">
-          <h1 className="text-4xl font-bold text-blue-900 mb-2">
-            📖 My Friendly Dictionary
-          </h1>
-          <p className="text-gray-700 text-lg">
-            Type a word and discover its meaning, phonetics, and examples
-          </p>
-        </header>
+      <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 flex justify-center items-start py-10 px-4">
+        <div className="w-full max-w-xl">
+          <header className="text-center mb-6">
+            <h1 className="text-3xl font-bold text-blue-700">
+              Simple Dictionary
+            </h1>
+            <p className="text-gray-600 mt-1">
+              Search any word to see its meaning, usage, and phonetics
+            </p>
+          </header>
 
-        <SearchBar />
-        <WordCard />
+          <div className="bg-white shadow-xl rounded-2xl p-6 flex flex-col gap-6">
+            <SearchBar />
+            <WordCard />
+          </div>
+        </div>
       </div>
     </QueryClientProvider>
   );

@@ -1,58 +1,93 @@
-import { useQuery } from "@tanstack/react-query";
-import { fetchWord } from "../api/dictionary";
+import { useEffect, useState } from "react";
 import { useDictionaryStore } from "../store/useDictionaryStore";
-import type { DictionaryWord } from "../types/dictionary";
+import type { DictionaryWord, Meaning, Definition, Phonetic } from "../types/dictionary";
 
 export default function WordCard() {
-  const word = useDictionaryStore((s) => s.word);
+  const { word } = useDictionaryStore();
 
-  const { data, isLoading, isError } = useQuery<DictionaryWord>({
-    queryKey: ["dictionary", word],
-    queryFn: () => fetchWord(word),
-    enabled: !!word,
-    staleTime: 1000 * 60 * 5, 
-  });
+  const [data, setData] = useState<DictionaryWord | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
+
+  useEffect(() => {
+    if (!word) return;
+
+    const fetchWord = async () => {
+      setIsLoading(true);
+      setIsError(false);
+
+      try {
+        const res = await fetch(
+          `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`
+        );
+        if (!res.ok) throw new Error();
+
+        const result: DictionaryWord[] = await res.json();
+        setData(result[0]);
+      } catch {
+        setIsError(true);
+        setData(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchWord();
+  }, [word]);
 
   if (!word) return null;
-  if (isLoading) return <p className="text-center mt-4">Loading...</p>;
-  if (isError || !data) return <p className="text-center mt-4">Word not found.</p>;
+  if (isLoading) return <p className="text-center text-gray-600">Loading...</p>;
+  if (isError || !data)
+    return <p className="text-center text-red-600">Word not found. Check spelling.</p>;
 
   const playAudio = () => {
-    const audioUrl = data.phonetics?.find((p) => p.audio)?.audio;
-    if (audioUrl) new Audio(audioUrl).play();
+    const url = data.phonetics?.find((p: Phonetic) => p.audio)?.audio;
+    if (url) new Audio(url).play();
   };
 
   return (
-    <div className="bg-white shadow-xl rounded-2xl p-6 max-w-2xl mx-auto mt-8 animate-fadeIn">
-      
-      <div className="flex justify-between items-center mb-2">
-        <h2 className="text-3xl font-bold text-gray-900">{data.word}</h2>
-        <button
-          onClick={playAudio}
-          className="text-blue-500 hover:text-blue-700 text-2xl"
-          title="Play pronunciation"
-        >
-          🔊
-        </button>
+    <div className="mt-6 flex flex-col gap-4">
+
+      <div className="flex justify-between items-start">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">{data.word}</h2>
+          {data.phonetics?.[0]?.text && (
+            <p className="text-gray-500">{data.phonetics[0].text}</p>
+          )}
+        </div>
+
+        {data.phonetics?.find((p: Phonetic) => p.audio) && (
+          <button
+            onClick={playAudio}
+            className="text-2xl hover:opacity-70"
+            title="Play pronunciation"
+          >
+            🔊
+          </button>
+        )}
       </div>
 
-      {data.phonetics?.[0]?.text && (
-        <p className="text-gray-500 italic mb-4">{data.phonetics[0].text}</p>
-      )}
+      {data.meanings.map((meaning: Meaning, idx: number) => (
+        <div key={idx} className="border border-gray-300 p-4 rounded-xl bg-gray-50 shadow-sm">
+          <p className="text-blue-700 font-semibold italic">
+            {meaning.partOfSpeech}
+          </p>
 
-      {data.meanings.map((meaning, idx) => (
-        <section key={idx} className="mt-4">
-          <p className="font-semibold text-lg text-blue-700">{meaning.partOfSpeech}</p>
-          {meaning.definitions.map((def, i) => (
-            <div key={i} className="pl-4 mt-2">
-              <p className="mb-1 text-gray-800">• {def.definition}</p>
+          {meaning.definitions.slice(0, 3).map((def: Definition, i: number) => (
+            <div key={i} className="mt-3">
+              <p className="text-gray-800">
+                {i + 1}. {def.definition}
+              </p>
+
               {def.example && (
-                <p className="italic text-gray-500 mb-2">Example: {def.example}</p>
+                <p className="text-gray-500 italic mt-1 ml-4">"{def.example}"</p>
               )}
             </div>
           ))}
-        </section>
+        </div>
       ))}
     </div>
   );
 }
+
+
